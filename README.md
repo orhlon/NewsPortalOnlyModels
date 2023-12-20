@@ -6,3 +6,5 @@ version_info = 3.8.10.final.0
 virtualenv = 20.24.5
 include-system-site-packages = false
 Django-4.2.8
+
+List of commands privided in a sepaarte .txt file
