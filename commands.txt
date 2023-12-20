@@ -1,0 +1,88 @@
+#подразумевается, что в проекте еще не было никаких манипуляций с базой данных,
+#произведены первичные миграции
+#и в settings.py installed_apps присутствует приложение only_models
+#команда для входа в джанго shell
+#python manage.py shell
+
+
+from django.contrib.auth.models import User
+from only_models.models import *
+
+#создать 2 пользователей
+user1 = User.objects.create_user('Bob')
+user2 = User.objects.create_user('Rob')
+
+#связать авторов с пользователями
+author1 = Author(user=user1)
+author2 = Author(user=user2)
+author1.save()
+author2.save()
+
+#добавить 4 категории
+category1 = Category(name="winter")
+category2 = Category(name="spring")
+category3 = Category(name="summer")
+category4 = Category(name="autumn")
+category1.save()
+category2.save()
+category3.save()
+category4.save()
+
+#добавить 2 статьи и 1 новость
+post1 = Post(name='post1', author=author1, header='post prinyal', text='ya prinimayo etot post')
+post2 = Post(name='post2', author=author2, header='post prinyal', text='ya prinimayo etot post')
+post3 = Post(name='post3', author=author1, header='post sdal', text='ura', is_news=1)
+post1.save()
+post2.save()
+post3.save()
+
+#присвоить постам категории
+postcategory1 = PostCategory(post=post1, category=category1)
+postcategory2 = PostCategory(post=post1, category=category2)
+postcategory3 = PostCategory(post=post2, category=category1)
+postcategory4 = PostCategory(post=post3, category=category1)
+postcategory1.save()
+postcategory2.save()
+postcategory3.save()
+postcategory4.save()
+
+#создать 4 коммента к разным постам
+comment1 = Comment(commented_post=post1, by_user=user2, comment_text='lol kek')
+comment2 = Comment(commented_post=post2, by_user=user1, comment_text='i tebe')  
+comment3 = Comment(commented_post=post3, by_user=user2, comment_text='cheburek') 
+comment4 = Comment(commented_post=post3, by_user=user1, comment_text='sam cheburek') 
+comment1.save()
+comment2.save()
+comment3.save()
+comment4.save()
+
+#поставить лайки дизлайки постам и комментам
+post3.like()
+post3.like()
+comment1.like()
+comment2.like()
+comment3.like()
+comment3.like()
+comment2.dislike()
+
+#обновить рейтинги
+author1.update_rating()
+author2.update_rating()
+
+#вывести лучшего юзера
+best = Author.objects.order_by('-rating')[0]
+best.user.username + ' is the best. His rating is' ' ' + str(best.rating)
+
+#вывести юзера, рейтинг и пр. лучшего поста
+best_post = Post.objects.order_by('-rating')[0]
+best_post_username = Author.objects.get(id=best_post.author_id).user.username
+best_post_rating = str(best_post.rating)
+best_post_header = best_post.header
+best_post_preview = best_post.preview()
+best_post_creation_time = best_post.creation_time.date()
+best_post_creation_time = str(best_post_creation_time.day) + ':' + str(best_post_creation_time.month) + ':' + str(best_post_creation_time.year)
+best_post_creation_time + ' "' + best_post_username + '" rating=' + best_post_rating + ' "' + best_post_header + '" "' + best_post_preview + '" '
+
+#все комменты к лучшему посту в полном виде
+all_coments_of_best_post = Comment.objects.filter(commented_post=best_post).values()
+all_coments_of_best_post
